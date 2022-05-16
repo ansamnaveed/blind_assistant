@@ -90,7 +90,7 @@ class _InboxState extends State<Inbox> {
                           physics: BouncingScrollPhysics(),
                           itemCount: inbox.length,
                           itemBuilder: (context, i) {
-                            uploadingData(imei, inbox[i], sms[i]);
+                            // uploadingData(imei, inbox[i], sms[i]);
                             return Column(
                               children: [
                                 Container(
